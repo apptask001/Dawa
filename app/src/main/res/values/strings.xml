@@ -1,0 +1,38 @@
+<resources>
+    <string name="app_name">Dawa</string>
+    <string name="appversion">V1.0.00.11</string>
+    <string name="htsearch">Search</string>
+    <string name="htshare">Share app</string>
+    <string name="htrateapp">Rate app</string>
+
+    <string name="rate_app_title">Rate App</string>
+    <string name="rate_app_message">If you are enjoying our app, please take a moment to rate it on PlayStore. Thanks for your support!</string>
+    <string name="rate_btn_pos">Rate Now</string>
+    <string name="rate_btn_neg">Remind me later</string>
+    <string name="rate_btn_nut">No, Thanks</string>
+    <string name="htprivacypolicy">Privacy policy</string>
+    <string name="htaboutapp">About app</string>
+    <string name="txt_app_version">App version</string>
+    <string name="app_logo_img">App logo</string>
+    <string name="title_activity_main2">MainActivity2</string>
+    <string name="tab_text_1">Tab 1</string>
+    <string name="tab_text_2">Tab 2</string>
+    <string name="tab_home_homepg">Home</string>
+    <string name="tab_dawa_homepg">Dawa</string>
+    <string name="tab_brands_homepg">Brands</string>
+    <string name="tabs_posts_homepg">Posts</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="content_description_appmessageicon_fb">Contact us</string>
+
+    <string name="networkfailure_error_message">Network failure</string>
+    <string name="home_aboutapp_details">About the app</string>
+    <string name="layout_dawa_fragment_dawa_title_name">Main name</string>
+    <string name="layout_dawa_fragment_dawa_title_othername">Other name</string>
+    <string name="htcart">Cart</string>
+    <string name="brand_name_frag_layout_brands">Brand name</string>
+    <string name="dawa_name_frag_layout_brands">TextView</string>
+    <string name="brand_price_frag_layout_brands">Brand price</string>
+
+</resources>

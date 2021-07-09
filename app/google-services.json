@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "59997739101",
+    "project_id": "other-projects-dad3d",
+    "storage_bucket": "other-projects-dad3d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:59997739101:android:b4082e8d69884f3b16d5b4",
+        "android_client_info": {
+          "package_name": "tzdawa.app.mwakalonga.dawa"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "59997739101-6i5lg7gect2qsfaalc9ollg7ufq8ke4h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDJ6PZmrswpN9uFOfTeGq2yFloa8k-6yaM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "59997739101-6i5lg7gect2qsfaalc9ollg7ufq8ke4h.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

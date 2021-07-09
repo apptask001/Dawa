@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/htsearch"
+        android:icon="@drawable/ic_search_black_24dp"
+        android:orderInCategory="1"
+        android:title="@string/htsearch"
+        app:actionViewClass="android.widget.SearchView"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/htcart"
+        android:icon="@drawable/ic_baseline_shopping_cart_24"
+        android:orderInCategory="2"
+        android:title="@string/htcart"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/htshare"
+        android:icon="@drawable/ic_baseline_share_24"
+        android:orderInCategory="3"
+        android:title="@string/htshare"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/htrateapp"
+        android:orderInCategory="4"
+        android:title="@string/htrateapp"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/htprivacypolicy"
+        android:orderInCategory="5"
+        android:title="@string/htprivacypolicy"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/htaboutapp"
+        android:orderInCategory="6"
+        android:title="@string/htaboutapp"
+        app:showAsAction="never" />
+</menu>
