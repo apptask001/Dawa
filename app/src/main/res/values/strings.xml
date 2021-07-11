@@ -26,7 +26,7 @@
 
     <string name="content_description_appmessageicon_fb">Contact us</string>
 
-    <string name="networkfailure_error_message">Network failure</string>
+    <string name="networkfailure_error_message">REQUEST_FAILED</string>
     <string name="home_aboutapp_details">About the app</string>
     <string name="layout_dawa_fragment_dawa_title_name">Main name</string>
     <string name="layout_dawa_fragment_dawa_title_othername">Other name</string>

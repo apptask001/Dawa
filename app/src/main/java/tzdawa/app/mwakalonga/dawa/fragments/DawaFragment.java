@@ -6,15 +6,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -25,15 +22,10 @@ import com.androidnetworking.AndroidNetworking;
 import com.androidnetworking.common.Priority;
 import com.androidnetworking.error.ANError;
 import com.androidnetworking.interfaces.JSONArrayRequestListener;
-
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.initialization.InitializationStatus;
-import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
-import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -63,12 +55,12 @@ public class DawaFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-    private AdView mAdView;
+    private AdView mAdView1;
     private View fgview;
     private SwipeRefreshLayout swipeRefreshLayout;
     private ProgressDialog progressDialog;
     private RecyclerView fgdawa_recyclerview;
-    private ProgressBar progressBar;
+
     private ArrayList<fragment_items_dawa> arrylstdawalist;
     private dawa_list_fragment_adp dawa_list_fragment_adp;
     private RecyclerView.LayoutManager rllayoutManager;
@@ -131,20 +123,15 @@ public class DawaFragment extends Fragment {
                     // Toast.makeText(context, "Begin search on dawa fragment", Toast.LENGTH_SHORT).show();
                     // Log.e("BROADCAST_RECEIVED_FRA", searchqueryText);
                     search_text = (searchqueryText);
-                    actsearch_text = ("1");
                     Toast.makeText(getActivity(), (String.format("Searching for \"%s\"..", searchqueryText)), Toast.LENGTH_SHORT).show();
                     loaddawaapi(searchqueryText);
-                    if (mInterstitialAd != null) {
-                        mInterstitialAd.show(Objects.requireNonNull(getActivity()));
-                        loadinterstacialads();
-                    }
+
                 }
             }
         };
 
         loadviews();
         loadbannerads();
-        loadinterstacialads();
         loaddawaapi("");
         return fgview;
     }
@@ -164,21 +151,22 @@ public class DawaFragment extends Fragment {
     }
 
     private void loaddawaapi(String searchQuery) {
-        progressBar.setVisibility(View.VISIBLE);
-        fgdawa_recyclerview.setVisibility(View.INVISIBLE);
-
-        AndroidNetworking.get((BuildConfig.SERVER_URL))
-                .addQueryParameter("viewall_dawa", "true")
-                .addQueryParameter("advsearch", searchQuery)
+        swipeRefreshLayout.setRefreshing(true);
+        AndroidNetworking.post((BuildConfig.SERVER_URL))
+                .addBodyParameter("VIEW_ALL_DAWA_LIST", "1")
+                .addBodyParameter("RANDOM_ORDER_FORMAT", "1")
+                .addBodyParameter("SEARCH_DAWA", "1")
+                .addBodyParameter("DAWA_NAME", (searchQuery))
                 .setPriority(Priority.HIGH)
                 .build()
                 .getAsJSONArray(new JSONArrayRequestListener() {
                     @Override
                     public void onResponse(JSONArray response) {
-                        progressBar.setVisibility(View.INVISIBLE);
+                        //Log.e("demont_worked",  response.toString());
+                        //progressBar.setVisibility(View.INVISIBLE);
                         fgdawa_recyclerview.setVisibility(View.VISIBLE);
 
-                    //    Log.e("dawa_list", response.toString());
+                        //    Log.e("dawa_list", response.toString());
 
                         try {
                             JSONArray mJsonArray = new JSONArray(response.toString().trim());
@@ -197,31 +185,25 @@ public class DawaFragment extends Fragment {
 
                             for (int i = 0; i < dawa_list_length; i++) {
                                 mJsonObject = mJsonArray.getJSONObject(i);
-                                arrylstdawalist.add(new fragment_items_dawa((mJsonObject.getString("dn")), (mJsonObject.getString("don"))));
-                                dawalist_tokens.add((mJsonObject.getString("dt")));
-                                dawalist_dawaname.add((mJsonObject.getString("dn")));
+                                arrylstdawalist.add(new fragment_items_dawa((mJsonObject.getString("dname")), (mJsonObject.getString("dothname"))));
+                                dawalist_tokens.add((mJsonObject.getString("dtoken")));
+                                dawalist_dawaname.add((mJsonObject.getString("dname")));
                             }
                             dawa_list_fragment_adp = new dawa_list_fragment_adp(
-                                    arrylstdawalist, new dawa_list_fragment_adp.OnItemClickListener() {
-                                @Override
-                                public void onItemClick(int position) {
-                                    //  Toast.makeText(getActivity(), (dawalist_tokens.get(position)), Toast.LENGTH_SHORT).show();
-                                    //   String webviewurl = (String.format("%s?viewdawa_details&dawaid=%s",BuildConfig.SERVER_URL,(dawalist_tokens.get(position))));
-                                    Intent detailspage = new Intent(getActivity(), MainActivity.class);
-                                    detailspage.putExtra("toolbartitle", (dawalist_dawaname.get(position).toUpperCase()));
-                                    detailspage.putExtra("webviewurl", ((String.format("%s?viewdawa_details&dawaid=%s&searchact=%s&searchtxt=%s", BuildConfig.SERVER_URL, (dawalist_tokens.get(position)),
-                                            (actsearch_text), (search_text)
-                                    ))));
-                                    detailspage.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                                    startActivity(detailspage);
-
-                                }
+                                    arrylstdawalist, position -> {
+                                //  Toast.makeText(getActivity(), (dawalist_tokens.get(position)), Toast.LENGTH_SHORT).show();
+                                //   String webviewurl = (String.format("%s?viewdawa_details&dawaid=%s",BuildConfig.SERVER_URL,(dawalist_tokens.get(position))));
+                                Intent detailspage = new Intent(getActivity(), MainActivity.class);
+                                detailspage.putExtra("toolbartitle", (dawalist_dawaname.get(position).toUpperCase()));
+                                detailspage.putExtra("webviewurl", ("https://admkapp.000webhostapp.com/a-dawa/master-admin/detailspage.php?showdawacontent&id=")+(dawalist_tokens.get(position)));
+                                detailspage.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                                startActivity(detailspage);
 
                             }
                             );
                             fgdawa_recyclerview.setAdapter(dawa_list_fragment_adp);
                         } catch (JSONException e) {
-                            progressBar.setVisibility(View.INVISIBLE);
+                            //progressBar.setVisibility(View.INVISIBLE);
                             swipeRefreshLayout.setRefreshing(false);
                             e.printStackTrace();
                         }
@@ -230,7 +212,8 @@ public class DawaFragment extends Fragment {
 
                     @Override
                     public void onError(ANError anError) {
-                        progressBar.setVisibility(View.INVISIBLE);
+                       // Log.e("demont_failed", anError.getMessage());
+                       // Log.e("DAWA_ERROR", anError.toString() );
                         swipeRefreshLayout.setRefreshing(false);
                         Toast.makeText(getActivity(), R.string.networkfailure_error_message, Toast.LENGTH_SHORT).show();
                     }
@@ -239,60 +222,22 @@ public class DawaFragment extends Fragment {
 
     private void loadviews() {
         swipeRefreshLayout = fgview.findViewById(R.id.swipeRefreshLayout);
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                if (mInterstitialAd != null) {
-                    mInterstitialAd.show(Objects.requireNonNull(getActivity()));
-                    loadinterstacialads();
-                }
-                fgdawa_recyclerview.setVisibility(View.INVISIBLE);
-                progressBar.setVisibility(View.VISIBLE);
-                loaddawaapi("");
-            }
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            fgdawa_recyclerview.setVisibility(View.INVISIBLE);
+            loaddawaapi("");
         });
-
-
-        progressBar = fgview.findViewById(R.id.fgdawa_progressbar);
-        progressBar.setVisibility(View.VISIBLE);
 
         fgdawa_recyclerview = fgview.findViewById(R.id.fgdawa_rcview);
         fgdawa_recyclerview.setVisibility(View.INVISIBLE);
-
         adRequest = new AdRequest.Builder().build();
     }
 
     private void loadbannerads() {
-        MobileAds.initialize(getActivity(), new OnInitializationCompleteListener() {
-            @Override
-            public void onInitializationComplete(InitializationStatus initializationStatus) {
-
-            }
+        MobileAds.initialize(Objects.requireNonNull(getActivity()), initializationStatus -> {
         });
 
-        mAdView = fgview.findViewById(R.id.fgdw_adView);
-        mAdView.loadAd(adRequest);
-    }
-
-    private void loadinterstacialads() {
-        InterstitialAd.load(Objects.requireNonNull(getActivity()), BuildConfig.ADMOB_INTERSTACIAL, adRequest, new InterstitialAdLoadCallback() {
-            @Override
-            public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
-                // The mInterstitialAd reference will be null until
-                // an ad is loaded.
-                mInterstitialAd = interstitialAd;
-                //Log.i(TAG, "onAdLoaded");
-            }
-
-            @Override
-            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                // Handle the error
-                // Log.i(TAG, loadAdError.getMessage());
-                mInterstitialAd = null;
-            }
-        });
-
-
+        mAdView1 = fgview.findViewById(R.id.fgdw_adView1);
+        mAdView1.loadAd(adRequest);
     }
 
     @Override
@@ -302,8 +247,10 @@ public class DawaFragment extends Fragment {
         if (isVisibleToUser) {
             //Toast.makeText(getActivity(), "Brands fragment is visible to user", Toast.LENGTH_SHORT).show();
             fragvisibility = 1;
+           // fgdawa_recyclerview.setVisibility(View.VISIBLE);
         } else {
             fragvisibility = 0;
+          //  fgdawa_recyclerview.setVisibility(View.INVISIBLE);
         }
     }
 }

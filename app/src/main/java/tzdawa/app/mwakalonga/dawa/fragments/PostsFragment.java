@@ -56,7 +56,7 @@ public class PostsFragment extends Fragment {
     private ArrayList<String> brandslist_name;
     private int broadcastcount = 0;
     private AdRequest adRequest;
-    private InterstitialAd mInterstitialAd;
+
     private String search_text = ("");
     private String actsearch_text = ("0");
     private View fgview;
@@ -106,11 +106,8 @@ public class PostsFragment extends Fragment {
     }
 
     private void loadbannerads() {
-        MobileAds.initialize(getActivity(), new OnInitializationCompleteListener() {
-            @Override
-            public void onInitializationComplete(InitializationStatus initializationStatus) {
+        MobileAds.initialize(getActivity(), initializationStatus -> {
 
-            }
         });
 
         mAdView = fgview.findViewById(R.id.fgpst_adView);
@@ -122,10 +119,7 @@ public class PostsFragment extends Fragment {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                if (mInterstitialAd != null) {
-                    mInterstitialAd.show(Objects.requireNonNull(getActivity()));
-                    loadinterstacialads();
-                }
+
                 fgpst_recyclerview.setVisibility(View.INVISIBLE);
                 progressBar.setVisibility(View.VISIBLE);
                 loadpostsapi("");
@@ -133,8 +127,7 @@ public class PostsFragment extends Fragment {
         });
 
 
-        progressBar = fgview.findViewById(R.id.fgdawa_progressbar);
-        progressBar.setVisibility(View.VISIBLE);
+
 
         fgpst_recyclerview = fgview.findViewById(R.id.fgpst_rcview);
         fgpst_recyclerview.setVisibility(View.INVISIBLE);
@@ -146,26 +139,6 @@ public class PostsFragment extends Fragment {
 
     }
 
-    private void loadinterstacialads() {
-        InterstitialAd.load(Objects.requireNonNull(getActivity()), BuildConfig.ADMOB_INTERSTACIAL, adRequest, new InterstitialAdLoadCallback() {
-            @Override
-            public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
-                // The mInterstitialAd reference will be null until
-                // an ad is loaded.
-                mInterstitialAd = interstitialAd;
-                //Log.i(TAG, "onAdLoaded");
-            }
-
-            @Override
-            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                // Handle the error
-                // Log.i(TAG, loadAdError.getMessage());
-                mInterstitialAd = null;
-            }
-        });
-
-
-    }
 
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {

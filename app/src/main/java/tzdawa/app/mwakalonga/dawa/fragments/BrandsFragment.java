@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -60,22 +61,16 @@ public class BrandsFragment extends Fragment {
     private static final String ARG_PARAM2 = "param2";
     private BroadcastReceiver broadcastReceiver;
     private String searchqueryText;
-    private Context context;
     private char fragvisibility;
     private SwipeRefreshLayout swipeRefreshLayout;
-    private ProgressDialog progressDialog;
     private RecyclerView fgbrands_recyclerview;
-    private ProgressBar progressBar;
     private ArrayList<fragment_items_brands> arrylstbrandlist;
     private brands_list_fragment_adp brands_list_fragment_adp;
-    private RecyclerView.LayoutManager rllayoutManager;
     private ArrayList<String> brandslist_tokens;
     private ArrayList<String> brandslist_name;
-    private int broadcastcount = 0;
     private AdRequest adRequest;
-    private InterstitialAd mInterstitialAd;
+
     private String search_text = ("");
-    private String actsearch_text = ("0");
     private View fgview;
     private AdView mAdView;
 
@@ -134,96 +129,59 @@ public class BrandsFragment extends Fragment {
                     // Toast.makeText(context, "Begin search on dawa fragment", Toast.LENGTH_SHORT).show();
                     // Log.e("BROADCAST_RECEIVED_FRA", searchqueryText);
                     search_text = (searchqueryText);
-                    actsearch_text = ("1");
                     Toast.makeText(getActivity(), (String.format("Searching for \"%s\"..", searchqueryText)), Toast.LENGTH_SHORT).show();
                     loadbrandsapi(searchqueryText);
-                    if (mInterstitialAd != null) {
-                        mInterstitialAd.show(Objects.requireNonNull(getActivity()));
-                        loadinterstacialads();
-                    }
+
                 }
             }
         };
         loadviews();
         loadbannerads();
-        loadinterstacialads();
+        //loadinterstacialads();
         loadbrandsapi("");
         return fgview;
     }
 
     private void loadviews() {
         swipeRefreshLayout = fgview.findViewById(R.id.swipeRefreshLayout);
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                if (mInterstitialAd != null) {
-                    mInterstitialAd.show(Objects.requireNonNull(getActivity()));
-                    loadinterstacialads();
-                }
-                fgbrands_recyclerview.setVisibility(View.INVISIBLE);
-                progressBar.setVisibility(View.VISIBLE);
-                loadbrandsapi("");
-            }
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            fgbrands_recyclerview.setVisibility(View.INVISIBLE);
+            loadbrandsapi("");
         });
 
 
-        progressBar = fgview.findViewById(R.id.fgdawa_progressbar);
-        progressBar.setVisibility(View.VISIBLE);
-
-        fgbrands_recyclerview = fgview.findViewById(R.id.fgbrands_rcview);
+        fgbrands_recyclerview = fgview.findViewById(R.id.fgbrand_rcview);
         fgbrands_recyclerview.setVisibility(View.INVISIBLE);
 
         adRequest = new AdRequest.Builder().build();
     }
 
     private void loadbannerads() {
-        MobileAds.initialize(getActivity(), new OnInitializationCompleteListener() {
-            @Override
-            public void onInitializationComplete(InitializationStatus initializationStatus) {
+        MobileAds.initialize(getActivity(), initializationStatus -> {
 
-            }
         });
 
-        mAdView = fgview.findViewById(R.id.fgbd_adView);
+        mAdView = fgview.findViewById(R.id.fgdw_adView1);
         mAdView.loadAd(adRequest);
     }
 
 
-    private void loadinterstacialads() {
-        InterstitialAd.load(Objects.requireNonNull(getActivity()), BuildConfig.ADMOB_INTERSTACIAL, adRequest, new InterstitialAdLoadCallback() {
-            @Override
-            public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
-                // The mInterstitialAd reference will be null until
-                // an ad is loaded.
-                mInterstitialAd = interstitialAd;
-                //Log.i(TAG, "onAdLoaded");
-            }
-
-            @Override
-            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                // Handle the error
-                // Log.i(TAG, loadAdError.getMessage());
-                mInterstitialAd = null;
-            }
-        });
-    }
-
     private void loadbrandsapi(String searchQuery) {
-        progressBar.setVisibility(View.VISIBLE);
+        swipeRefreshLayout.setRefreshing(true);
         fgbrands_recyclerview.setVisibility(View.INVISIBLE);
 
-        AndroidNetworking.get((BuildConfig.SERVER_URL))
-                .addQueryParameter("viewall_brands", "true")
-                .addQueryParameter("advsearch", searchQuery)
+        AndroidNetworking.post((BuildConfig.SERVER_URL))
+                .addBodyParameter("VIEW_ALL_BRAND_LIST", "1")
+                .addBodyParameter("RANDOM_ORDER_FORMAT", "1")
+                .addBodyParameter("BRAND_DAWA_COMBINATION", "1")
+                .addBodyParameter("SEARCH_BRANDS_RELATE_DAWA", (searchQuery))
                 .setPriority(Priority.HIGH)
                 .build()
                 .getAsJSONArray(new JSONArrayRequestListener() {
                     @Override
                     public void onResponse(JSONArray response) {
-                        progressBar.setVisibility(View.INVISIBLE);
                         fgbrands_recyclerview.setVisibility(View.VISIBLE);
-
-                        //Log.e("dawa_list", response.toString());
+                       // Log.e("BRAND_JSON", response.toString());
 
                         try {
                             JSONArray mJsonArray = new JSONArray(response.toString().trim());
@@ -243,33 +201,26 @@ public class BrandsFragment extends Fragment {
                             for (int i = 0; i < (brands_list_length); i++) {
                                 mJsonObject = mJsonArray.getJSONObject(i);
                                 arrylstbrandlist.add(new fragment_items_brands(
-                                        (mJsonObject.getString("mt")),(mJsonObject.getString("mn")),
-                                        (mJsonObject.getString("mp")),(mJsonObject.getString("mi"))
+                                        (mJsonObject.getString("btoken")), (mJsonObject.getString("bname")),
+                                        (mJsonObject.getString("bprice")), (mJsonObject.getString("bimage"))
                                 ));
-                                brandslist_tokens.add((mJsonObject.getString("mt")));
-                                brandslist_name.add((mJsonObject.getString("mn")));
+                                brandslist_tokens.add((mJsonObject.getString("btoken")));
+                                brandslist_name.add((mJsonObject.getString("bname")));
                             }
                             brands_list_fragment_adp = new brands_list_fragment_adp(
-                                    arrylstbrandlist, new brands_list_fragment_adp.OnItemClickListener() {
-                                @Override
-                                public void onItemClick(int position) {
-                                    //  Toast.makeText(getActivity(), (dawalist_tokens.get(position)), Toast.LENGTH_SHORT).show();
-                                    //   String webviewurl = (String.format("%s?viewdawa_details&dawaid=%s",BuildConfig.SERVER_URL,(dawalist_tokens.get(position))));
-                                    Intent detailspage = new Intent(getActivity(), MainActivity.class);
-                                    detailspage.putExtra("toolbartitle", (brandslist_name.get(position).toUpperCase()));
-                                    detailspage.putExtra("webviewurl", ((String.format("%s?viewbrands_details&brandid=%s&searchact=%s&searchtxt=%s", BuildConfig.SERVER_URL, (brandslist_tokens.get(position)),
-                                            (actsearch_text), (search_text)
-                                    ))));
-                                    detailspage.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                                    startActivity(detailspage);
-
-                                }
+                                    arrylstbrandlist, position -> {
+                                //  Toast.makeText(getActivity(), (dawalist_tokens.get(position)), Toast.LENGTH_SHORT).show();
+                                //   String webviewurl = (String.format("%s?viewdawa_details&dawaid=%s",BuildConfig.SERVER_URL,(dawalist_tokens.get(position))));
+                                Intent detailspage = new Intent(getActivity(), MainActivity.class);
+                                detailspage.putExtra("toolbartitle", (brandslist_name.get(position).toUpperCase()));
+                                detailspage.putExtra("webviewurl", ("https://admkapp.000webhostapp.com/a-dawa/master-admin/detailspage.php?showbrandcontent&id=") + (brandslist_tokens.get(position)));
+                                detailspage.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                                startActivity(detailspage);
 
                             }
                             );
                             fgbrands_recyclerview.setAdapter(brands_list_fragment_adp);
                         } catch (JSONException e) {
-                            progressBar.setVisibility(View.INVISIBLE);
                             swipeRefreshLayout.setRefreshing(false);
                             e.printStackTrace();
                         }
@@ -278,7 +229,6 @@ public class BrandsFragment extends Fragment {
 
                     @Override
                     public void onError(ANError anError) {
-                        progressBar.setVisibility(View.INVISIBLE);
                         swipeRefreshLayout.setRefreshing(false);
                         Toast.makeText(getActivity(), R.string.networkfailure_error_message, Toast.LENGTH_SHORT).show();
                     }

@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
         progressBar.setVisibility(View.VISIBLE);
     }
 
-    public void homepage() {
+    public void redirecttohomepage() {
         startActivity(new Intent(MainActivity.this, tzdawa.app.mwakalonga.dawa.home.MainActivity.class));
     }
 
@@ -60,13 +60,13 @@ public class MainActivity extends AppCompatActivity {
                     //  progressBar.setVisibility(View.VISIBLE);
                     new Handler().postDelayed(() -> {
                         progressBar.setVisibility(View.INVISIBLE);
-                        homepage();
+                        redirecttohomepage();
                         finish();
                     }, 5000);
                 }
                 if (report.isAnyPermissionPermanentlyDenied()) {
                     progressBar.setVisibility(View.INVISIBLE);
-                    a_showsettingsdialog();
+                    showsettingsdialog();
                 }
             }
 
@@ -74,12 +74,12 @@ public class MainActivity extends AppCompatActivity {
             public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions, PermissionToken token) {
                 token.continuePermissionRequest();
             }
-        }).withErrorListener(error -> Toast.makeText(MainActivity.this, "Permission problem occured", Toast.LENGTH_SHORT).show()).onSameThread().check();
+        }).withErrorListener(error -> Toast.makeText(MainActivity.this, "PERMISSION_ERROR", Toast.LENGTH_SHORT).show()).onSameThread().check();
 
     }
 
 
-    private void a_showsettingsdialog() {
+    private void showsettingsdialog() {
         CFAlertDialog.Builder builder = new CFAlertDialog.Builder(this)
                 .setDialogStyle(CFAlertDialog.CFAlertStyle.BOTTOM_SHEET)
                 .setTitle("Permissions failure")
@@ -89,12 +89,12 @@ public class MainActivity extends AppCompatActivity {
                         CFAlertDialog.CFAlertActionStyle.POSITIVE, CFAlertDialog.CFAlertActionAlignment.END, (dialog, which) -> {
                             //Toast.makeText(MainActivity.this, "Upgrade tapped", Toast.LENGTH_SHORT).show();
                             dialog.dismiss();
-                            a_opensettings();
+                            opensettings();
                         });
         builder.show();
     }
 
-    private void a_opensettings() {
+    private void opensettings() {
         Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
         Uri uri = Uri.fromParts("package", getPackageName(), null);
         intent.setData(uri);

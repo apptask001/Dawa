@@ -2,24 +2,22 @@ package tzdawa.app.mwakalonga.dawa.home;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.app.Fragment;
 import android.content.ActivityNotFoundException;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.widget.SearchView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.viewpager.widget.ViewPager;
@@ -27,7 +25,12 @@ import androidx.viewpager.widget.ViewPager;
 import com.androidnetworking.AndroidNetworking;
 import com.androidnetworking.common.Priority;
 import com.androidnetworking.error.ANError;
+import com.androidnetworking.interfaces.JSONArrayRequestListener;
 import com.androidnetworking.interfaces.StringRequestListener;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.interstitial.InterstitialAd;
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
@@ -41,9 +44,16 @@ import tzdawa.app.mwakalonga.dawa.BuildConfig;
 import tzdawa.app.mwakalonga.dawa.R;
 import tzdawa.app.mwakalonga.dawa.home.ui.main.SectionsPagerAdapter;
 
+import com.google.android.gms.ads.AdRequest;
+
+import org.json.JSONArray;
+
+import java.util.Objects;
+
 public class MainActivity extends AppCompatActivity {
     private ReviewManager reviewManager;
-    private Fragment fragment;
+    private InterstitialAd mInterstitialAd;
+    private AdRequest adRequest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,76 +88,95 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                /*Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();*/
+        fab.setOnClickListener(view -> {
+            /*Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();*/
 
-                String[] myphonenumbers = {"WhatsApp", "Sms", "Live chat"};
+            String[] myphonenumbers = {"WhatsApp", "Sms", "Live chat"};
 
-                AlertDialog.Builder callbuilder = new AlertDialog.Builder(MainActivity.this);
-                callbuilder.setTitle("Message using");
-                callbuilder.setItems(myphonenumbers, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        // the user clicked on colors[which]
+            AlertDialog.Builder callbuilder = new AlertDialog.Builder(MainActivity.this);
+            callbuilder.setTitle("Message using");
+            callbuilder.setItems(myphonenumbers, (dialog, which) -> {
+                // the user clicked on colors[which]
 
-                        switch (which) {
-                            case 0:
-                                openChromeCustomTabs("https://wa.me/255688445680");
-                                break;
+                switch (which) {
+                    case 0:
+                        openChromeCustomTabs("https://wa.me/255688445680");
+                        break;
 
-                            case 1:
-                                startActivity(new Intent(Intent.ACTION_VIEW, Uri.fromParts("sms", "255688445680", null)));
-                                break;
+                    case 1:
+                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.fromParts("sms", "255688445680", null)));
+                        break;
 
-                            case 2:
-                                openChromeCustomTabs("https://tawk.to/chat/5e2805968e78b86ed8aa7ea6/default");
-                                break;
+                    case 2:
+                        openChromeCustomTabs("https://tawk.to/chat/5e2805968e78b86ed8aa7ea6/default");
+                        break;
 
-                            default:
-                                Toast.makeText(MainActivity.this, "Unknown selection", Toast.LENGTH_SHORT).show();
-                                break;
-                        }
-                    }
-                });
-                callbuilder.show();
-            }
+                    default:
+                        Toast.makeText(MainActivity.this, "UNKNOWN_SELECTION", Toast.LENGTH_SHORT).show();
+                        break;
+                }
+            });
+            callbuilder.show();
         });
 
         bindxmlviews();
-        cloudmessaginginit();
+        loadCloudMessagingInit();
+        displayads();
 
     }
 
-    private void cloudmessaginginit() {
+    private void displayads() {
+        adRequest = new AdRequest.Builder().build();
+        MobileAds.initialize((MainActivity.this), initializationStatus -> {
+
+        });
+
+        InterstitialAd.load((MainActivity.this), (BuildConfig.ADMOB_INTERSTACIAL), (adRequest),
+                new InterstitialAdLoadCallback() {
+                    @Override
+                    public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+                        // The mInterstitialAd reference will be null until
+                        // an ad is loaded.
+                        mInterstitialAd = (interstitialAd);
+                        //Log.i("interstitialAd", "onAdLoaded");
+                    }
+
+                    @Override
+                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                        // Handle the error
+                        // Log.i("interstitialAd", loadAdError.getMessage());
+                        mInterstitialAd = (null);
+                    }
+                });
+    }
+
+    private void loadCloudMessagingInit() {
+
         FirebaseMessaging.getInstance().getToken().addOnCompleteListener(
                 task -> {
                     SharedPreferences tkpref = getApplicationContext().getSharedPreferences("TOKEN_MANAGER", MODE_PRIVATE);
+                   // Log.e("FBM_TOKEN", Objects.requireNonNull(task.getResult()));
 //task.getResult()
-                    if (((tkpref.getString("device_token_register", null)) == null) || (!(tkpref.getString("device_token_register", null).equals(task.getResult())))) {
+                    if (((tkpref.getString("DEVICE_TOKEN_REGISTER", null)) == null) || (!(tkpref.getString("DEVICE_TOKEN_REGISTER", null).equals(task.getResult())))) {
+                        AndroidNetworking.post((BuildConfig.SERVER_URL))
+                                .addBodyParameter("ADD_NEW_FCM_TOKEN", "1")
+                                .addBodyParameter("O_FCM_TOKEN", (Objects.requireNonNull(task.getResult()).trim()))
+                                .setPriority(Priority.HIGH)
+                                .build()
+                                .getAsJSONArray(new JSONArrayRequestListener() {
+                                    @Override
+                                    public void onResponse(JSONArray response) {
+                                        SharedPreferences.Editor tkeditor = tkpref.edit();
+                                        tkeditor.putString("DEVICE_TOKEN_REGISTER", (task.getResult()));
+                                        tkeditor.apply();
+                                    }
 
-                        //       Toast.makeText(this, "send to database", Toast.LENGTH_SHORT).show();
-                        AndroidNetworking.get((BuildConfig.SERVER_URL))
-                                .addQueryParameter("device_token_register", task.getResult())
-                                .setPriority(Priority.MEDIUM)
-                                .build().getAsString(new StringRequestListener() {
-                            @Override
-                            public void onResponse(String response) {
-                                SharedPreferences.Editor tkeditor = tkpref.edit();
-                                tkeditor.putString("device_token_register", (task.getResult()));
-                                tkeditor.apply();
-                                // Toast.makeText(MainActivity.this, "token received", Toast.LENGTH_SHORT).show();
-                            }
-
-                            @Override
-                            public void onError(ANError anError) {
-                                // Toast.makeText(MainActivity.this, "Failed to receive token", Toast.LENGTH_SHORT).show();
-                            }
-                        });
-
-
+                                    @Override
+                                    public void onError(ANError anError) {
+                                       // Log.e("FBM_TOKEN_ERROR", anError.getMessage());
+                                    }
+                                });
                     }
 
              /*
@@ -188,32 +217,37 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.hometop, menu);
 
-        MenuItem searchItem = menu.findItem(R.id.htsearch);
-        SearchView searchView = (SearchView) searchItem.getActionView();
+        MenuItem menuItem = menu.findItem(R.id.htsearch);
+        SearchView searchView = (SearchView) menuItem.getActionView();
         searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        searchView.setQueryHint("Tafuta ugonjwa, dawa..");
+
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                // Toast.makeText(MainActivity.this, query.trim(), Toast.LENGTH_SHORT).show();
-
                 if (!query.isEmpty()) {
+                    if (mInterstitialAd != null) {
+                        mInterstitialAd.show(MainActivity.this);
+                        displayads();
+                    }
+                    // Toast.makeText(MainActivity.this, "Searching for \"" + query.trim() + "\" ..", Toast.LENGTH_SHORT).show();
                     sendasearchbroadcast(query);
                 } else {
-                    Toast.makeText(MainActivity.this, "Input a text to search", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "EMPTY_SEARCH_TEXT", Toast.LENGTH_SHORT).show();
                 }
                 return false;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                //adapter.getFilter().filter(newText);
                 return false;
             }
         });
-        return true;
+        return super.onCreateOptionsMenu(menu);
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -233,7 +267,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
 
             case R.id.htprivacypolicy:
-                String privacypolicyurl = "https://dawa.flycricket.io/privacy.html";
+                String privacypolicyurl = "https://dawa-1.flycricket.io/privacy.html";
                 CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
                 //  builder.setToolbarColor(Color.parseColor(String.valueOf(R.color.teal_200)));
                 CustomTabsIntent customTabsIntent = builder.build();
@@ -243,15 +277,8 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(browserIntent);*/
                 break;
 
-            case R.id.htaboutapp:
-
-                break;
-
-            case R.id.htcart:
-
-                break;
             default:
-                String options_menu_failed_error = "Unknown selection";
+                String options_menu_failed_error = "UNKNOWN_SELECTION";
                 Toast.makeText(MainActivity.this, options_menu_failed_error, Toast.LENGTH_SHORT).show();
                 break;
 
@@ -301,7 +328,7 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         startActivity(appmarketlink);
                     } catch (ActivityNotFoundException e) {
-                        String notfounderror = "Unable to find market app";
+                        String notfounderror = "MARKET_APP_NOT_FOUND";
                         //  Toasty.error(getApplicationContext(), notfounderror, Toast.LENGTH_SHORT, true).show();
                         Toast.makeText(MainActivity.this, notfounderror, Toast.LENGTH_SHORT).show();
                     }
