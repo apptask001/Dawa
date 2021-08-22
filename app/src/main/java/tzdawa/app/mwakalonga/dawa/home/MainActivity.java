@@ -8,7 +8,6 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -26,7 +25,7 @@ import com.androidnetworking.AndroidNetworking;
 import com.androidnetworking.common.Priority;
 import com.androidnetworking.error.ANError;
 import com.androidnetworking.interfaces.JSONArrayRequestListener;
-import com.androidnetworking.interfaces.StringRequestListener;
+import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
@@ -40,15 +39,13 @@ import com.google.android.play.core.review.ReviewManagerFactory;
 import com.google.android.play.core.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessaging;
 
-import tzdawa.app.mwakalonga.dawa.BuildConfig;
-import tzdawa.app.mwakalonga.dawa.R;
-import tzdawa.app.mwakalonga.dawa.home.ui.main.SectionsPagerAdapter;
-
-import com.google.android.gms.ads.AdRequest;
-
 import org.json.JSONArray;
 
 import java.util.Objects;
+
+import tzdawa.app.mwakalonga.dawa.BuildConfig;
+import tzdawa.app.mwakalonga.dawa.R;
+import tzdawa.app.mwakalonga.dawa.home.ui.main.SectionsPagerAdapter;
 
 public class MainActivity extends AppCompatActivity {
     private ReviewManager reviewManager;
@@ -89,8 +86,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         fab.setOnClickListener(view -> {
-            /*Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show();*/
 
             String[] myphonenumbers = {"WhatsApp", "Sms", "Live chat"};
 

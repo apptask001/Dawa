@@ -55,7 +55,7 @@ public class DawaFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-    private AdView mAdView1;
+    private AdView mAdView1,mAdView2;
     private View fgview;
     private SwipeRefreshLayout swipeRefreshLayout;
     private ProgressDialog progressDialog;
@@ -238,6 +238,9 @@ public class DawaFragment extends Fragment {
 
         mAdView1 = fgview.findViewById(R.id.fgdw_adView1);
         mAdView1.loadAd(adRequest);
+
+        mAdView2 = fgview.findViewById(R.id.fgdw_adView2);
+        mAdView2.loadAd(adRequest);
     }
 
     @Override

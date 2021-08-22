@@ -13,8 +13,8 @@ android {
         applicationId "tzdawa.app.mwakalonga.dawa"
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 15
-        versionName "1.0.00.15"
+        versionCode 16
+        versionName "1.0.00.16"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

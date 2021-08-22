@@ -59,8 +59,6 @@ public class MainActivity extends AppCompatActivity {
         mAdView1 = findViewById(R.id.webv_adView1);
         mAdView1.loadAd(adRequest);
 
-        mAdView2 = findViewById(R.id.webv_adView2);
-        mAdView2.loadAd(adRequest);
     }
 
     @SuppressLint("SetJavaScriptEnabled")
